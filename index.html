@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<body>
+  <canvas id='c3' width='320' height='240' style='border:solid 1px'></canvas>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script>
+	var interval;
+	var t1,t2,t3;
+	function render(fb){
+    console.time('render');
+	console.log("FB!!!!:");
+	console.log(typeof fb);
+	var buff = new Int8Array(fb);
+	var c = document.getElementById('c3');
+	var ctx = c.getContext("2d");
+	var imageData = ctx.createImageData(320, 240);
+	var data = imageData.data;
+	console.log("FB2:"+data.length);
+	for (var i = 0; i < data.length; i += 4) {
+		var a = buff[(i>>1)+1];
+		var b = buff[(i>>1)];
+		data[i] = a&0xf8;
+		data[i + 1] = (((a&0x7)<<3)|((b&0xe0)>>5))<<2;
+		data[i + 2] = (b&0x1f)<<3;
+		data[i + 3] = 255;
+	}
+	ctx.putImageData(imageData, 0, 0);
+	console.log("FB3:");
+	console.timeEnd('render');
+  };
+  
+function requestFrame(){
+	//socket.emit('fb', '');
+	t1 = performance.now();
+	console.time('request');
+
+	clearTimeout(interval);
+	interval=setTimeout(requestFrame,1000);
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '/kk', true);
+	xhr.responseType = 'arraybuffer';
+	xhr.onload = function(e) {
+		// response is unsigned 8 bit integer
+		var responseArray = new Uint8Array(this.response); 
+		render(responseArray);
+		t2 = performance.now();
+		t3 = t2-t1;
+		console.log('total2:'+(t2-t1));
+		console.timeEnd('request');
+		//calculo la media
+		//clearInterval(interval);
+		//interval=setInterval(requestFrame,(t2-t1+10));
+		
+		clearTimeout(interval);
+		interval=setTimeout(requestFrame,10);
+
+		
+		console.log("TIME:"+(t2-t1+10));
+		console.log("Interval:"+interval);
+		
+	};
+	xhr.send();
+	
+//	$.get( "kk", function( data ) {
+//		render( data );
+//	});
+}
+
+	window.addEventListener('DOMContentLoaded', function() {
+		//interval=setInterval(requestFrame,1000);
+		interval=setTimeout(requestFrame,100);
+		//requestFrame();
+	});
+  </script>
+  </body>
+</html>
