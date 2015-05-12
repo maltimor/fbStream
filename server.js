@@ -45,7 +45,7 @@ server.on('connection', function (socket) {
 		var res = false;
 		if (ds.indexOf('GET / ') == 0) {
 			//devuelvo el index
-			var fd = fs.openSync('index3.html','r');
+			var fd = fs.openSync('index.html','r');
 			var read = fs.readSync(fd, buffer, 0, SIZE, 0);
 			fs.closeSync(fd);
 			socket.write('HTTP/1.1 200 OK\n');
